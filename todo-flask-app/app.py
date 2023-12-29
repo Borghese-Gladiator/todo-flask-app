@@ -2,12 +2,18 @@ from datetime import datetime
 
 from flask import Flask, Blueprint, abort, jsonify, request, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
 
 #==============
 #  UTILS
 #==============
 tasks = []
 api = Blueprint('api', __name__, url_prefix="/api")
+def object_as_dict(obj):
+    return {
+        c.key: getattr(obj, c.key)
+        for c in inspect(obj).mapper.column_attrs
+    }
 
 #==============
 #  APP
@@ -25,7 +31,7 @@ db = SQLAlchemy(app)
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    desc = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(100), nullable=False)
     is_complete = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -44,7 +50,7 @@ def health():
 
 @api.route('/todos', methods=['GET'])
 def get_todos():
-    todos = Todo.query.all()
+    todos = [object_as_dict(todo) for todo in Todo.query.all()]
     return jsonify(todos)
 
 @api.route('/todos/', methods=['POST'])
@@ -58,17 +64,16 @@ def create_todo():
     db.session.add(todo)
     db.session.commit()
     
-    return jsonify(todo, 204)
+    return jsonify(object_as_dict(todo)), 204
 
 @api.route('/todos/<int:todo_id>', methods=['GET'])
-def get_todo():
-    todo_id = request.args.get('todo_id')
+def get_todo(todo_id):
     if todo_id is None:
         abort(400)
     todo = Todo.query.filter_by(id=todo_id).first()
     if todo is None:
-        abort(404)
-    return jsonify(todo), 200
+        return jsonify({'error': 'Todo not found'}), 404
+    return jsonify(object_as_dict(todo))
 
 @api.route('/todos/<int:todo_id>', methods=['PUT'])
 def update_todo(todo_id):
@@ -82,7 +87,7 @@ def update_todo(todo_id):
     todo.completed = data.get('completed', todo.completed)
 
     db.session.commit()
-    return jsonify(todo), 200
+    return jsonify(object_as_dict(todo))
 
 @api.route('/todos/<int:todo_id>', methods=['PATCH'])
 def patch_todo(todo_id):
@@ -93,19 +98,17 @@ def patch_todo(todo_id):
     for key, value in data.items():
         setattr(todo, key, value)
     db.session.commit()
-    return jsonify(todo), 200
+    return jsonify(object_as_dict(todo))
 
 @api.route('/todos/<int:todo_id>', methods=['DELETE'])
-def delete_todo():
-    todo_id = request.args.get('todo_id')
+def delete_todo(todo_id):
     if todo_id is None:
-        abort(400)
-    with db.session.begin() as session:
-        todo = session.query(Todo).filter_by(id=todo_id).first()
-        if todo is None:
-            abort(404)
-        db.session.delete(todo)
-        db.session.commit()
+        return jsonify({'message': 'Please enter a todo_id'}), 400
+    todo = Todo.query.get(todo_id)
+    if todo is None:
+        return jsonify({'message': 'Todo not found'}), 400
+    db.session.delete(todo)
+    db.session.commit()
     return jsonify({}), 204
 
 app.register_blueprint(api)
