@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask, abort, jsonify, request, render_template, redirect, url_for
+from flask import Flask, Blueprint, abort, jsonify, request, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 #==============
@@ -12,6 +12,7 @@ tasks = []
 #  APP
 #==============
 app = Flask(__name__)
+api = Blueprint('api', __name__, url_prefix='/api')
 
 # Configure
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todos.db'
@@ -35,12 +36,12 @@ def index():
     return render_template('index.html', tasks=tasks)
 
 
-@app.route('/todos', methods=['GET'])
+@api.route('/todos', methods=['GET'])
 def get_todos():
     todos = Todo.query.all()
     return jsonify(todos)
 
-@app.route('/todos/', methods=['POST'])
+@api.route('/todos/', methods=['POST'])
 def create_todo():
     todo_data = request.get_json()
     if 'title' not in todo_data or 'description' not in todo_data:
@@ -53,7 +54,7 @@ def create_todo():
     
     return jsonify(todo, 204)
 
-@app.route('/todos/<int:todo_id>', methods=['GET'])
+@api.route('/todos/<int:todo_id>', methods=['GET'])
 def get_todo():
     todo_id = request.args.get('todo_id')
     if todo_id is None:
@@ -63,7 +64,7 @@ def get_todo():
         abort(404)
     return jsonify(todo), 200
 
-@app.route('/todos/<int:todo_id>', methods=['PUT'])
+@api.route('/todos/<int:todo_id>', methods=['PUT'])
 def update_todo(todo_id):
     todo = Todo.query.get(todo_id)
     if not todo:
@@ -77,7 +78,7 @@ def update_todo(todo_id):
     db.session.commit()
     return jsonify(todo), 200
 
-@app.route('/todos/<int:todo_id>', methods=['PATCH'])
+@api.route('/todos/<int:todo_id>', methods=['PATCH'])
 def patch_todo(todo_id):
     todo = Todo.query.get(todo_id)
     if not todo:
@@ -88,7 +89,7 @@ def patch_todo(todo_id):
     db.session.commit()
     return jsonify(todo), 200
 
-@app.route('/todos/<int:todo_id>', methods=['DELETE'])
+@api.route('/todos/<int:todo_id>', methods=['DELETE'])
 def delete_todo():
     todo_id = request.args.get('todo_id')
     if todo_id is None:
