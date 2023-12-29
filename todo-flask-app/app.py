@@ -4,15 +4,15 @@ from flask import Flask, Blueprint, abort, jsonify, request, render_template, re
 from flask_sqlalchemy import SQLAlchemy
 
 #==============
-#  STORAGE
+#  UTILS
 #==============
 tasks = []
+api = Blueprint('api', __name__, url_prefix="/api")
 
 #==============
 #  APP
 #==============
 app = Flask(__name__)
-api = Blueprint('api', __name__, url_prefix='/api')
 
 # Configure
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todos.db'
@@ -35,6 +35,12 @@ class Todo(db.Model):
 def index():
     return render_template('index.html', tasks=tasks)
 
+#==============
+#  API ROUTES
+#==============
+@api.route('/', methods=['GET'])
+def health():
+    return jsonify({"message": "Alive"})
 
 @api.route('/todos', methods=['GET'])
 def get_todos():
@@ -101,6 +107,8 @@ def delete_todo():
         db.session.delete(todo)
         db.session.commit()
     return jsonify({}), 204
+
+app.register_blueprint(api)
 
 if __name__ == '__main__':
     app.run(debug=True)
