@@ -1,7 +1,26 @@
 # Flask Template Project
 This project is to test out my local Kubernetes setup and refresh some Flask.
 
+## Setup
+- `poetry install`
+- `poetry run python .\todo-flask-app\app.py`
+
 # Notes
+## To Do
+- [x] write CRUD endpoints with Flask, Flask-SQLAlchemy + SQLite database (comes default with Python)
+- [ ] validate with Insomnia
+  - fix blueprint to register properly
+  - fix to run create table for SQLite
+  - fix returning SQLAlchemy results in: `TypeError: Object of type Todo is not JSON serializable`
+- [ ] add caching (Flask-Caching)
+- [ ] add rate limiting (Flask-Limiter)
+- [X] generate OpenAPI YAML => DONE, used ChatGPT
+- [ ] remove usage of flask-sqlalchemy and use SQLAlchemy base models instead
+- [ ] move api blueprint to its own file
+- [ ] automatically generate openapi YAML documentation
+- [ ] deploy to render.com
+- [ ] deploy via Harness to Kubernetes on home server
+
 ## Scaffolding
 - initialize project with Poetry
   ```
@@ -99,8 +118,3 @@ This project is to test out my local Kubernetes setup and refresh some Flask.
     New-Item -ItemType File -Path kubernetes\ingress.yaml
     New-Item -ItemType File -Path kubernetes\service.yaml
     ```
-
-## Deployment
-- deploy to Railway 
-- deploy via Harness to Kubernetes on home server
-
