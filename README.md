@@ -8,12 +8,13 @@ This project is to test out my local Kubernetes setup and refresh some Flask.
 # Notes
 ## To Do
 - [x] write CRUD endpoints with Flask, Flask-SQLAlchemy + SQLite database (comes default with Python)
-- [ ] validate with Insomnia
+- [ ] validate CRUD with Insomnia
   - fix blueprint to register properly
   - fix to run create table for SQLite
   - fix returning SQLAlchemy results in: `TypeError: Object of type Todo is not JSON serializable`
-- [ ] add caching (Flask-Caching)
-- [ ] add rate limiting (Flask-Limiter)
+- [ ] add caching (Flask-Caching) - https://flask-caching.readthedocs.io/en/latest/
+- [ ] add rate limiting (Flask-Limiter) - https://medium.com/analytics-vidhya/how-to-rate-limit-routes-in-flask-61c6c791961b
+- [ ] add performance testing - https://code.likeagirl.io/performance-testing-in-python-a-step-by-step-guide-with-flask-e5a56f99513d
 - [X] generate OpenAPI YAML => DONE, used ChatGPT
 - [ ] remove usage of flask-sqlalchemy and use SQLAlchemy base models instead
 - [ ] move api blueprint to its own file
